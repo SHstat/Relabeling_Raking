@@ -1,5 +1,8 @@
 ######################################################################
-# Functions: for index of training data set
+# Function: generate_train_test
+# Purpose: To split the dataset into training and test sets.
+# Parameters: Indexes of majority and minority class instances, and a seed for random sampling.
+# Process: The function randomly samples half of the major and minor class instances to create a balanced training dataset. The remaining instances are implicitly considered as the test set.
 ######################################################################
 generate_train_test <- function(ind_maj, ind_min, seed = 1){
   
@@ -22,7 +25,10 @@ generate_train_test <- function(ind_maj, ind_min, seed = 1){
 }
 
 ######################################################################
-# Functions: for RnR Algorithm
+# Function: Lagrange (Part of RnR Algorithm)
+# Purpose: To perform the raking process in the RnR algorithm.
+# Parameters: Include dataset features, target mean values for calibration (mx), distribution weights (d), criterion, and variable type (numeric or categorical).
+# Process: Adjusts the weights of instances in the major class to match the distribution of the minor class. This is a key part of the RnR algorithm.
 ######################################################################
 add <- function(x) Reduce("+", x)
 
@@ -74,6 +80,13 @@ Lagrange <- function(x,mx,d,cri=0, type){
   }
   return(W)
 }
+
+######################################################################
+# Function: RnR
+# Purpose: To implement the RnR algorithm for balancing the dataset.
+# Parameters: Training dataset, number of iterations for raking, and selected variable indices.
+# Process: Applies the RnR algorithm to balance the major and minor classes in the dataset. It involves relabeling and raking steps to adjust the distribution of the major class to resemble that of the minor class.
+######################################################################
 
 RnR <- function(train, N = 10, v_id = NULL){
   
@@ -155,7 +168,9 @@ RnR <- function(train, N = 10, v_id = NULL){
 }
 
 ######################################################################
-# Functions: for Alternative Algorithm
+# Functions: Adasyn, ROS, and Smote
+# Purpose: To apply alternative oversampling techniques.
+# Process: Each function implements a specific oversampling technique (ADASYN, ROS, and SMOTE) to balance the dataset. These methods generate synthetic samples of the minority class.
 ######################################################################
 Adasyn=function(train, k=1){
   Adasyn_dt <- ADAS(subset(train, select=-c(y)), train$y, K = min(table(train$y)[2]-1, 5))[["data"]]
@@ -194,7 +209,10 @@ Smote=function(train, k=1){
 }
 
 ######################################################################
-# Functions: for evaluation
+# Function: M2
+# Purpose: To calculate evaluation metrics.
+# Parameters: Test dataset and predicted labels.
+# Process: Computes metrics like G-mean, F-measure, and AUC for evaluating the performance of machine learning models.
 ######################################################################
 M2 = function(test, pred){
   con.mat <- table(test$y, pred)
@@ -228,6 +246,14 @@ M2 = function(test, pred){
   
   return(list(Gmean = Gmean, Fmeasure = F1, Auc = auc))
 }
+
+
+######################################################################
+# Function: Eval
+# Purpose: To train classifiers and evaluate them using the provided data.
+# Parameters: Training dataset, test dataset, classifier type (SVM, Random Forest, Naive Bayes), whether an alternative method is used, and a list of categorical columns.
+# Process: Trains the specified classifier on the training data and evaluates it on the test data using the M2 function to compute performance metrics.
+######################################################################
 
 Eval <- function(train, test, by, alter, cate.col){
   
