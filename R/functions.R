@@ -26,9 +26,9 @@ generate_train_test <- function(ind_maj, ind_min, seed = 1){
 
 ######################################################################
 # Function: Lagrange (Part of RnR Algorithm)
-# Purpose: To perform the raking process in the RnR algorithm.
-# Parameters: Include dataset features, target mean values for calibration (mx), distribution weights (d), criterion, and variable type (numeric or categorical).
-# Process: Adjusts the weights of instances in the major class to match the distribution of the minor class. This is a key part of the RnR algorithm.
+#Purpose: The Lagrange function is crucial for performing the raking process in the RnR algorithm. Its primary role is to adjust the weights of instances in the major class to match the distribution of the minor class.
+#Parameters: It takes five parameters: x (dataset features), mx (target mean values for calibration), d (distribution weights), cri (a criterion, defaulted to 0), and type (specifying whether the variable is numeric or categorical).
+#Process: The function operates differently for numeric and categorical variables: For numeric variables, it uses an iterative method (akin to Newton's method) to adjust the weights until convergence. For categorical variables, it adjusts weights based on the ratio and subtotal of classes.
 ######################################################################
 add <- function(x) Reduce("+", x)
 
@@ -84,8 +84,15 @@ Lagrange <- function(x,mx,d,cri=0, type){
 ######################################################################
 # Function: RnR
 # Purpose: To implement the RnR algorithm for balancing the dataset.
-# Parameters: Training dataset, number of iterations for raking, and selected variable indices.
-# Process: Applies the RnR algorithm to balance the major and minor classes in the dataset. It involves relabeling and raking steps to adjust the distribution of the major class to resemble that of the minor class.
+# Parameters: It accepts three parameters: train (the training dataset), N (the number of iterations for raking, default is 10), and v_id (column names of selected variables, if any).
+# Process: The RnR function follows several steps:
+# Data Preparation: Separates the training dataset into major and minor classes and identifies relevant indices.
+# Variable Selection: If provided, selects significant variables to focus the raking process.
+# Minor Class Calibration: Applies the Lagrange function iteratively to calibrate the distribution of the major class to resemble that of the minor class.
+# Sampling for Balance: Samples instances from both classes to create a balanced dataset. It includes relabeling some major instances as minor ones.
+# Major Class Recalibration: Recalibrates the remaining major instances using the Lagrange function again.
+# Data Aggregation: Combines the recalibrated major and minor instances to form a balanced dataset.
+# Outcome : The outcome of the RnR function is a balanced dataset (rnr.data).
 ######################################################################
 
 RnR <- function(train, N = 10, v_id = NULL){
